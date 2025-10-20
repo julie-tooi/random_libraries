@@ -1,0 +1,132 @@
+# Pipeline purpose - reads preprocessing, including adapters cutting
+# Statistics after trimming steps can help to analyse quality of libraries
+
+import os
+
+workdir: config['input_dir']
+path_to_samples = config['input_dir']
+path_to_output = config['output_dir']
+
+samples, = glob_wildcards(os.path.join(path_to_samples, "{samples}_R1_001.fastq.gz"))
+
+print(samples)
+
+rule all:
+    input:
+        trimmed_samples = expand(os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed.fastq.gz"), index=samples),
+        T7_trimmed_samples= expand(os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed_T7.fastq.gz"),index=samples),
+        HH_trimmed_samples= expand(os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed_T7_HH.fastq.gz"),index=samples),
+        fully_trimmed_samples = expand(os.path.join(path_to_output,
+             "{index}" + "_R1_trimmed_T7_HH_HDV.fastq.gz"), index=samples)
+
+rule cut_illumina_adapter:
+    input:
+        samples_R1 = os.path.join(path_to_samples, "{index}_R1_001.fastq.gz"),
+        samples_R2 = os.path.join(path_to_samples,"{index}_R2_001.fastq.gz")
+    output:
+        trimmed_samples_R1 = os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed.fastq"),
+        trimmed_samples_R2 = os.path.join(path_to_output,
+            "{index}" + "_R2_trimmed.fastq"),
+        cutadapt_log = os.path.join(path_to_output,
+            "{index}" + "_cutadapt_trimmed_log")
+    shell:
+        'cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTC '
+        '-A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT '
+        '-o {output.trimmed_samples_R1} -p {output.trimmed_samples_R2} '
+        '{input.samples_R1} {input.samples_R2} &> {output.cutadapt_log}'
+
+
+rule cut_T7_adapter:
+    input:
+        samples_R1 = rules.cut_illumina_adapter.output.trimmed_samples_R1,
+        samples_R2 = rules.cut_illumina_adapter.output.trimmed_samples_R2
+    output:
+        trimmed_samples_R1 = os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed_T7.fastq"),
+        trimmed_samples_R2 = os.path.join(path_to_output,
+            "{index}" + "_R2_trimmed_T7.fastq"),
+        cutadapt_log = os.path.join(path_to_output,
+            "{index}" + "_cutadapt_trimmed_T7_log")
+    shell:
+        'cutadapt -g GGAGATCTAATACGACTCACTATA '
+        '-A TATAGTGAGTCGTATTAGATCTCC '
+        '-o {output.trimmed_samples_R1} -p {output.trimmed_samples_R2} '
+        '{input.samples_R1} {input.samples_R2} &> {output.cutadapt_log}'
+
+rule cut_HH_adapter:
+    input:
+        samples_R1 = rules.cut_T7_adapter.output.trimmed_samples_R1,
+        samples_R2 = rules.cut_T7_adapter.output.trimmed_samples_R2
+    output:
+        trimmed_samples_R1 = os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed_T7_HH.fastq"),
+        trimmed_samples_R2 = os.path.join(path_to_output,
+            "{index}" + "_R2_trimmed_T7_HH.fastq"),
+        cutadapt_log = os.path.join(path_to_output,
+            "{index}" + "_cutadapt_trimmed_T7_HH_log")
+    shell:
+        'cutadapt -g GGGAGACTGAAGATTTAAGCTGATGAGTCCGTGAGGACGAAACGGTACCCGGTACCGTC '
+        '-A GACGGTACCGGGTACCGTTTCGTCCTCACGGACTCATCAGCTTAAATCTTCAGTCTCCC '
+        '-o {output.trimmed_samples_R1} -p {output.trimmed_samples_R2} '
+        '{input.samples_R1} {input.samples_R2} &> {output.cutadapt_log}'
+
+
+rule cut_HDV_adapter:
+    input:
+        samples_R1 = rules.cut_HH_adapter.output.trimmed_samples_R1,
+        samples_R2= rules.cut_HH_adapter.output.trimmed_samples_R2
+    output:
+        trimmed_samples_R1 = os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed_T7_HH_HDV.fastq"),
+        trimmed_samples_R2 = os.path.join(path_to_output,
+            "{index}" + "_R2_trimmed_T7_HH_HDV.fastq"),
+        cutadapt_log = os.path.join(path_to_output,
+            "{index}" + "_cutadapt_trimmed_T7_HH_HDV_log")
+    shell:
+        'cutadapt -a GGGTCGGCATGGCATCTCCACCTCCTCGCGGTCCGACCTGGGCTACTTCGGTAGGCTAAGGGAGAAGCTTGGCACTGGCCGTCGTTT '
+        '-G AAACGACGGCCAGTGCCAAGCTTCTCCCTTAGCCTACCGAAGTAGCCCAGGTCGGACCGCGAGGAGGTGGAGATGCCATGCCGACCC '
+        '-o {output.trimmed_samples_R1} -p {output.trimmed_samples_R2} '
+        '{input.samples_R1} {input.samples_R2} &> {output.cutadapt_log}'
+
+
+
+rule zip_files:
+    input:
+        samples_R1_HDV = rules.cut_HDV_adapter.output.trimmed_samples_R1,
+        samples_R2_HDV = rules.cut_HDV_adapter.output.trimmed_samples_R2,
+        samples_R1_HH = rules.cut_HH_adapter.output.trimmed_samples_R1,
+        samples_R2_HH = rules.cut_HH_adapter.output.trimmed_samples_R2,
+        samples_R1_T7 = rules.cut_T7_adapter.output.trimmed_samples_R1,
+        samples_R2_T7 = rules.cut_T7_adapter.output.trimmed_samples_R2,
+        samples_R1= rules.cut_illumina_adapter.output.trimmed_samples_R1,
+        samples_R2=rules.cut_illumina_adapter.output.trimmed_samples_R2
+    output:
+        gz_samples_R1_HDV = os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed_T7_HH_HDV.fastq.gz"),
+        gz_samples_R2_HDV = os.path.join(path_to_output,
+            "{index}" + "_R2_trimmed_T7_HH_HDV.fastq.gz"),
+        gz_samples_R1_HH = os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed_T7_HH.fastq.gz"),
+        gz_samples_R2_HH = os.path.join(path_to_output,
+            "{index}" + "_R2_trimmed_T7_HH.fastq.gz"),
+        gz_samples_R1_T7 = os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed_T7.fastq.gz"),
+        gz_samples_R2_T7 = os.path.join(path_to_output,
+            "{index}" + "_R2_trimmed_T7.fastq.gz"),
+        gz_samples_R1= os.path.join(path_to_output,
+            "{index}" + "_R1_trimmed.fastq.gz"),
+        gz_samples_R2=os.path.join(path_to_output,
+            "{index}" + "_R2_trimmed.fastq.gz"),
+    run:
+        shell('gzip {input.samples_R1_HDV}')
+        shell('gzip {input.samples_R2_HDV}')
+        shell('gzip {input.samples_R1_HH}')
+        shell('gzip {input.samples_R2_HH}')
+        shell('gzip {input.samples_R1_T7}')
+        shell('gzip {input.samples_R2_T7}')
+        shell('gzip {input.samples_R1}')
+        shell('gzip {input.samples_R2}')
