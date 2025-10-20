@@ -1,4 +1,4 @@
-# Analysis description
+# Recognition of aberrant structures by EF-Tu
 
 ## Project description
 
@@ -30,6 +30,11 @@ Bias towards G and T bases was found, as a characteristic of molecules productio
 
 What was used: 
 
+snakemake 7.32.4
+python 3.10.16
+biopython 1.79
+
+
 #### Preprocessing
 
 Reads trimming (in `reads_preprocessing`):
@@ -38,9 +43,34 @@ Reads trimming (in `reads_preprocessing`):
 
 Collect run statistics
 
-`python scripts/statistics_collection/run_statistics.py`
+```
+python scripts/statistics_collection/run_statistics.py
+
+usage: run_statistics.py [-h] -i_raw INPUT_RAW -i_tr INPUT_TRIMMED -o OUTPUT
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i_raw INPUT_RAW, --input_raw INPUT_RAW
+                        Path to raw reads in fastq.gz format
+  -i_tr INPUT_TRIMMED, --input_trimmed INPUT_TRIMMED
+                        Path to reads in fastq.gz format (all stages)
+  -o OUTPUT, --output OUTPUT
+                        Path to collected stats
+```
 
 Read length distribution:
 
-`python scripts/statistics_collection/length_distribution_per_sample.py`
+```
+python scripts/statistics_collection/length_distribution_per_sample.py
+
+usage: length_distribution_per_sample.py [-h] -i INPUT -o OUTPUT
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Path to reads in fastq.gz format (fully processed
+                        T7_HH_HDV)
+  -o OUTPUT, --output OUTPUT
+                        Path to collected read length distribution
+```
 
