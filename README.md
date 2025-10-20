@@ -4,8 +4,10 @@
 
 Experiments with *in vitro* molecule selection by proteins can demonstrate 
 the optimal tRNA structure accepted by protein. 
+
 Test protein in this case: EF-Tu (from *R. culicivorax*), which can accept 
-truncated tRNAs. Test molecule: mt-tRNA-Ile.
+truncated tRNAs. 
+Test molecule: mt-tRNA-Ile.
 
 The experiment layout and library preparation steps (designed by Nadine Grafl):
 
@@ -31,7 +33,9 @@ Bias towards G and T bases was found, as a characteristic of molecules productio
 What was used: 
 
 snakemake 7.32.4
+
 python 3.10.16
+
 biopython 1.79
 
 
@@ -74,3 +78,31 @@ optional arguments:
                         Path to collected read length distribution
 ```
 
+#### Prepare targets for folding
+
+On this step two different files with targets are made: targets with length 50 and 51.
+As we know that they can be analyzed together, and first base added unspecifically - two files can be simply unified with `cat`
+(they have the same length 50)
+
+```
+usage: targets_from_reads.py [-h] -i INPUT -o OUTPUT [-t TOP]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Input reads in fastq.gz format
+  -o OUTPUT, --output OUTPUT
+                        Output reads in fasta format (path without the
+                        .extension)
+  -t TOP, --top TOP     Print top of not unique targets
+```
+
+#### Folding
+
+Generating open energies
+`RNAplfold -O < inserts_i50_51.fasta`
+
+Probability of being unpair:
+`RNAplfold -u 2 < inserts_i50_51_fasta`
+
+Collect folding results:
