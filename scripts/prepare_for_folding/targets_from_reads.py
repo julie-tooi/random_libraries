@@ -1,5 +1,5 @@
 # Script purpose is to have the exact target sequences that we expected
-# separate 50 and 51 sequences, prepare targets for folding
+# separate 50 and 51 sequences, prepare targets for folding and clustering
 
 import gzip
 from collections import defaultdict
@@ -27,42 +27,52 @@ if __name__ == '__main__':
     with open(f"{path_to_output}_i50.fasta", 'w') as output_handler_i50, \
             open(f"{path_to_output}_i51.fasta", 'w') as output_handler_i51, \
             open(f"{path_to_output}_i50_51.fasta", 'w') as output_handler_i50_51:
-        with gzip.open(path_to_reads, "rt") as file_handle:
-            for record in SeqIO.parse(file_handle, "fastq"):
+        with open(f"{path_to_output}_only_targets.csv", 'w') as output_targets:
+            with gzip.open(path_to_reads, "rt") as file_handle:
 
-                sequence = record.seq
+                sample_name = path_to_output.split("/")[-1].split("_")[0]
 
-                if "N" not in sequence:
+                for record in SeqIO.parse(file_handle, "fastq"):
 
-                    sequence_collection_number[sequence] += 1
+                    sequence = str(record.seq)
 
-                    sequence_len = len(sequence)
+                    if "N" not in sequence:
 
-                    if sequence_len == 50:
-                        if sequence[0:5] == "CTTAA" and \
-                                sequence[13:36] == "AATTTAAATTGATAATTTAAATT" \
-                                and sequence[41:] == "TTAAGACCA":
+                        sequence_collection_number[sequence] += 1
 
-                            count_50 += 1
+                        sequence_len = len(sequence)
 
-                            output_handler_i50.write(">" + str(record.name) + "\n")
-                            output_handler_i50.write(str(sequence) + "\n")
+                        if sequence_len == 50:
+                            if sequence[0:5] == "CTTAA" and \
+                                    sequence[13:36] == "AATTTAAATTGATAATTTAAATT" \
+                                    and sequence[41:] == "TTAAGACCA":
 
-                            output_handler_i50_51.write(">" + str(record.name) + "\n")
-                            output_handler_i50_51.write(str(sequence) + "\n")
+                                count_50 += 1
 
-                    if sequence_len == 51:
-                        if sequence[1:6] == "CTTAA" and \
-                                sequence[14:37] == "AATTTAAATTGATAATTTAAATT" \
-                                and sequence[42:] == "TTAAGACCA":
+                                output_handler_i50.write(">" + record.name + "\n")
+                                output_handler_i50.write(sequence + "\n")
 
-                            count_51 += 1
+                                output_handler_i50_51.write(">" + record.name + "\n")
+                                output_handler_i50_51.write(sequence + "\n")
 
-                            output_handler_i51.write(">" + str(record.name) + "\n")
-                            output_handler_i51.write(f"{str(sequence[1:])}" + "\n")
+                                target_sequence = f"{sequence[5:13]}{sequence[36:41]}"
+                                output_targets.write(f"{sample_name},{target_sequence}\n")
 
-                            output_handler_i50_51.write(">" + str(record.name) + "\n")
-                            output_handler_i50_51.write(f"{str(sequence[1:])}" + "\n")
+                        if sequence_len == 51:
+                            if sequence[1:6] == "CTTAA" and \
+                                    sequence[14:37] == "AATTTAAATTGATAATTTAAATT" \
+                                    and sequence[42:] == "TTAAGACCA":
+
+                                count_51 += 1
+
+                                output_handler_i51.write(">" + record.name + "\n")
+                                output_handler_i51.write(f"{sequence[1:]}" + "\n")
+
+                                output_handler_i50_51.write(">" + record.name + "\n")
+                                output_handler_i50_51.write(f"{sequence[1:]}" + "\n")
+
+                                target_sequence = f"{sequence[6:14]}{sequence[37:42]}"
+                                output_targets.write(f"{sample_name},{target_sequence}\n")
 
     print(f"Numer if reads: insertion 50b {count_50}, 51b {count_51} ")
 
