@@ -38,6 +38,7 @@ python 3.10.16
 
 biopython 1.79
 
+RNAplfold 2.4.9
 
 #### Preprocessing
 
@@ -85,6 +86,8 @@ As we know that they can be analyzed together, and first base added unspecifical
 (they have the same length 50)
 
 ```
+python scripts/prepare_for_folding/targets_from_reads.py
+
 usage: targets_from_reads.py [-h] -i INPUT -o OUTPUT [-t TOP]
 
 optional arguments:
@@ -99,10 +102,49 @@ optional arguments:
 
 #### Folding
 
-Generating open energies
-`RNAplfold -O < inserts_i50_51.fasta`
+Generating open energies (change probabilities output to their logarithms).
+Can be useful to track small changes.
 
-Probability of being unpair:
-`RNAplfold -u 2 < inserts_i50_51_fasta`
+`RNAplfold -O < targets_i50_51.fasta`
+
+Probability of being unpair (additionally counts mean probability of length u): `RNAplfold -u 2 < targets_i50_51.fasta`
 
 Collect folding results:
+
+```
+python scripts/folding_analysis/collect_rnaplfold_results.py
+
+usage: collect_rnaplfold_results.py [-h] -i INPUT -o OUTPUT -s SAMPLE -t
+                                    {prob,en}
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Path to folder with folding results
+  -o OUTPUT, --output OUTPUT
+                        Path to output
+  -s SAMPLE, --sample SAMPLE
+                        Sample name
+  -t {prob,en}, --type {prob,en}
+                        Type of information (probabilities or open energies)
+```
+
+ Minimum free energy (MFE) of target structures:
+
+ `RNAfold -p -d2 --noLP < targets_i50_51.fasta > targets_i50_51.rnafold_out`
+
+ Parce MFE results:
+
+```
+python scripts/folding_analysis/mfe_results.py
+
+usage: mfe_results.py [-h] -i INPUT -o OUTPUT
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Path to RNAfold folding output
+  -o OUTPUT, --output OUTPUT
+                        Path to collected MFE
+
+```
