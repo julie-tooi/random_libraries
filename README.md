@@ -40,6 +40,19 @@ biopython 1.79
 
 RNAplfold/RNAfold 2.4.9
 
+R 4.4.1, RStudio
+
+
+R packages:
+
+ggplot2 3.5.2
+
+dplyr 1.1.4
+
+tidyr 1.3.1
+
+DiffLogo 2.28.0
+
 #### Preprocessing
 
 Reads trimming (in `reads_preprocessing`):
@@ -78,6 +91,8 @@ optional arguments:
   -o OUTPUT, --output OUTPUT
                         Path to collected read length distribution
 ```
+
+Script for length distribution plot: `scripts/statistics_collection/len_plots.R`
 
 #### Prepare targets for folding
 
@@ -149,4 +164,22 @@ optional arguments:
 
 ```
 
-#### Visualisation
+#### Visualization
+
+There are two steps in data analysis.
+Sequnce analysis includes logo and diff logo analysis, together with k-mers analysis.
+
+`scripts/folding_analysis/sequence_analysis.R`
+
+Structure analysis includes folding results visualization
+
+`scripts/folding_analysis/structure_analysis.R`
+
+
+#### Results example
+
+
+
+# Author
+
+Julie Ozerova [julie@bioinf.uni-leipzig.de](julie@bioinf.uni-leipzig.de)
