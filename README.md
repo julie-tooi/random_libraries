@@ -31,18 +31,17 @@ Bias towards G and T bases was found, as a characteristic of molecules productio
 #### Requirements
 
 What was used: 
-
-snakemake 7.32.4
-python 3.10.16
-biopython 1.79
-RNAplfold/RNAfold 2.4.9
-R 4.4.1, RStudio
+- snakemake 7.32.4
+- python 3.10.16
+- biopython 1.79
+- RNAplfold/RNAfold 2.4.9
+- R 4.4.1, RStudio
 
 R packages:
-ggplot2 3.5.2
-dplyr 1.1.4
-tidyr 1.3.1
-DiffLogo 2.28.0
+- ggplot2 3.5.2
+- dplyr 1.1.4
+- tidyr 1.3.1
+- DiffLogo 2.28.0
 
 #### Preprocessing
 
@@ -158,7 +157,7 @@ optional arguments:
 #### Visualization
 
 There are two steps in data analysis.
-Sequnce analysis includes logo and diff logo analysis, together with k-mers analysis.
+Sequence analysis includes logo and diff logo analysis, together with k-mers analysis.
 
 `scripts/folding_analysis/sequence_analysis.R`
 
