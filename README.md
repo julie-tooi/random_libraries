@@ -33,24 +33,15 @@ Bias towards G and T bases was found, as a characteristic of molecules productio
 What was used: 
 
 snakemake 7.32.4
-
 python 3.10.16
-
 biopython 1.79
-
 RNAplfold/RNAfold 2.4.9
-
 R 4.4.1, RStudio
 
-
 R packages:
-
 ggplot2 3.5.2
-
 dplyr 1.1.4
-
 tidyr 1.3.1
-
 DiffLogo 2.28.0
 
 #### Preprocessing
@@ -180,6 +171,6 @@ Structure analysis includes folding results visualization
 
 
 
-# Author
+## Author
 
 Julie Ozerova [julie@bioinf.uni-leipzig.de](julie@bioinf.uni-leipzig.de)
