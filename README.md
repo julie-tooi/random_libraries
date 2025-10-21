@@ -38,7 +38,7 @@ python 3.10.16
 
 biopython 1.79
 
-RNAplfold 2.4.9
+RNAplfold/RNAfold 2.4.9
 
 #### Preprocessing
 
@@ -148,3 +148,5 @@ optional arguments:
                         Path to collected MFE
 
 ```
+
+#### Visualisation
