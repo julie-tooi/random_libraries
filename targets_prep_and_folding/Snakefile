@@ -20,7 +20,8 @@ rule target_preparation:
     input:
         reads = os.path.join(path_to_samples, "{index}_R1_trimmed_T7_HH_HDV.fastq.gz")
     output:
-        output_log = os.path.join(path_to_samples, "{index}_targets_info")
+        output_log = os.path.join(path_to_samples, "{index}_targets_info"),
+        output = os.path.join(path_to_samples,"{index}_i50_51.fasta")
     params:
         output_wo_ext = os.path.join(path_to_samples, "{index}")
     shell:
@@ -31,7 +32,7 @@ rule target_preparation:
 rule folding_openen:
     input:
         target_prep_log = rules.target_preparation.output.output_log,
-        samples = os.path.join(path_to_samples, "{index}_i50_51.fasta")
+        samples = rules.target_preparation.output.output
     output:
         openen_results = directory(os.path.join(path_to_samples, "{index}_openen"))
     shell:
@@ -44,7 +45,7 @@ rule folding_openen:
 rule folding_probs:
     input:
         target_prep_log = rules.target_preparation.output.output_log,
-        samples = os.path.join(path_to_samples, "{index}_i50_51.fasta")
+        samples = rules.target_preparation.output.output
     output:
         probs_results = directory(os.path.join(path_to_samples, "{index}_probs"))
     shell:
