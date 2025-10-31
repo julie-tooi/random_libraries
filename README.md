@@ -1,4 +1,4 @@
-# Recognition of aberrant structures by EF-Tu
+# Recognition of aberrant mt-tRNA structures by EF-Tu
 
 ## Project description
 
