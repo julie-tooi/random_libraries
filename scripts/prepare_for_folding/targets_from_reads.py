@@ -75,6 +75,7 @@ if __name__ == '__main__':
                                     target_sequence = f"{sequence[6:14]}{sequence[37:42]}"
                                     output_targets.write(f"{sample_name},{target_sequence}\n")
 
+    print(f"Sample {sample_name}")
     print(f"Number of reads: insertion 50b - {count_50}, 51b - {count_51} ")
 
     all_frequencies = []
