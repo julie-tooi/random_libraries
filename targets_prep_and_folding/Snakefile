@@ -1,0 +1,56 @@
+# Pipeline purpose - prepare targets for folding,
+# run folding with RNAfold
+
+import os
+
+workdir: config['input_dir']
+path_to_samples = config['input_dir']
+
+samples, = glob_wildcards(os.path.join(path_to_samples, "{samples}_R1_trimmed_T7_HH_HDV.fastq.gz"))
+
+print(samples)
+
+rule all:
+    input:
+        openen_results = expand(os.path.join(path_to_samples, "{index}_openen"), index=samples),
+        probs_results = expand(os.path.join(path_to_samples,"{index}_probs"),index=samples),
+
+
+rule target_preparation:
+    input:
+        reads = os.path.join(path_to_samples, "{index}_R1_trimmed_T7_HH_HDV.fastq.gz")
+    output:
+        output_log = os.path.join(path_to_samples, "{index}_targets_info")
+    params:
+        output_wo_ext = os.path.join(path_to_samples, "{index}")
+    shell:
+        """
+        python scripts/prepare_for_folding/targets_from_reads.py -i {input.reads} -o {params.output_wo_ext} > {output.output_log}
+        """
+
+rule folding_openen:
+    input:
+        target_prep_log = rules.target_preparation.output.output_log,
+        samples = os.path.join(path_to_samples, "{index}_i50_51.fasta")
+    output:
+        openen_results = directory(os.path.join(path_to_samples, "{index}_openen"))
+    shell:
+        """
+        mkdir {output.openen_results}
+        cd {output.openen_results}
+        RNAplfold -O < {input.samples}
+        """
+
+rule folding_probs:
+    input:
+        target_prep_log = rules.target_preparation.output.output_log,
+        samples = os.path.join(path_to_samples, "{index}_i50_51.fasta")
+    output:
+        probs_results = directory(os.path.join(path_to_samples, "{index}_probs"))
+    shell:
+        """
+        mkdir {output.probs_results}
+        cd {output.probs_results}
+        RNAplfold -u 2 < {input.samples}
+        """
+
