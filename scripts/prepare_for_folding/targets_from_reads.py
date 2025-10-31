@@ -8,7 +8,7 @@ import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", help="Input reads in fastq.gz format", type=str, required=True)
+    parser.add_argument("-i", "--input", help="Input one sample reads in fastq.gz format", type=str, required=True)
     parser.add_argument("-o", "--output", help="Output reads in fasta format (path without the .extension)", type=str, required=True)
     parser.add_argument("-t", "--top", help="Print top of not unique targets", type=int, default=1)
 
@@ -36,45 +36,46 @@ if __name__ == '__main__':
 
                     sequence = str(record.seq)
 
-                    if "N" not in sequence:
+                    if sequence:
+                        if "N" not in sequence:
 
-                        sequence_collection_number[sequence] += 1
+                            sequence_collection_number[sequence] += 1
 
-                        sequence_len = len(sequence)
+                            sequence_len = len(sequence)
 
-                        if sequence_len == 50:
-                            if sequence[0:5] == "CTTAA" and \
-                                    sequence[13:36] == "AATTTAAATTGATAATTTAAATT" \
-                                    and sequence[41:] == "TTAAGACCA":
+                            if sequence_len == 50:
+                                if sequence[0:5] == "CTTAA" and \
+                                        sequence[13:36] == "AATTTAAATTGATAATTTAAATT" \
+                                        and sequence[41:] == "TTAAGACCA":
 
-                                count_50 += 1
+                                    count_50 += 1
 
-                                output_handler_i50.write(">" + record.name + "\n")
-                                output_handler_i50.write(sequence + "\n")
+                                    output_handler_i50.write(">" + record.name + "\n")
+                                    output_handler_i50.write(sequence + "\n")
 
-                                output_handler_i50_51.write(">" + record.name + "\n")
-                                output_handler_i50_51.write(sequence + "\n")
+                                    output_handler_i50_51.write(">" + record.name + "\n")
+                                    output_handler_i50_51.write(sequence + "\n")
 
-                                target_sequence = f"{sequence[5:13]}{sequence[36:41]}"
-                                output_targets.write(f"{sample_name},{target_sequence}\n")
+                                    target_sequence = f"{sequence[5:13]}{sequence[36:41]}"
+                                    output_targets.write(f"{sample_name},{target_sequence}\n")
 
-                        if sequence_len == 51:
-                            if sequence[1:6] == "CTTAA" and \
-                                    sequence[14:37] == "AATTTAAATTGATAATTTAAATT" \
-                                    and sequence[42:] == "TTAAGACCA":
+                            if sequence_len == 51:
+                                if sequence[1:6] == "CTTAA" and \
+                                        sequence[14:37] == "AATTTAAATTGATAATTTAAATT" \
+                                        and sequence[42:] == "TTAAGACCA":
 
-                                count_51 += 1
+                                    count_51 += 1
 
-                                output_handler_i51.write(">" + record.name + "\n")
-                                output_handler_i51.write(f"{sequence[1:]}" + "\n")
+                                    output_handler_i51.write(">" + record.name + "\n")
+                                    output_handler_i51.write(f"{sequence[1:]}" + "\n")
 
-                                output_handler_i50_51.write(">" + record.name + "\n")
-                                output_handler_i50_51.write(f"{sequence[1:]}" + "\n")
+                                    output_handler_i50_51.write(">" + record.name + "\n")
+                                    output_handler_i50_51.write(f"{sequence[1:]}" + "\n")
 
-                                target_sequence = f"{sequence[6:14]}{sequence[37:42]}"
-                                output_targets.write(f"{sample_name},{target_sequence}\n")
+                                    target_sequence = f"{sequence[6:14]}{sequence[37:42]}"
+                                    output_targets.write(f"{sample_name},{target_sequence}\n")
 
-    print(f"Numer if reads: insertion 50b {count_50}, 51b {count_51} ")
+    print(f"Number if reads: insertion 50b - {count_50}, 51b - {count_51} ")
 
     all_frequencies = []
 
