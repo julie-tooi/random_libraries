@@ -24,10 +24,10 @@ rule target_preparation:
         output = os.path.join(path_to_samples,"{index}_i50_51.fasta")
     params:
         output_wo_ext = os.path.join(path_to_samples, "{index}")
-    shell:
-        """
-        python {workflow.source_path('prepare_for_folding/targets_from_reads.py')} -i {input.reads} -o {params.output_wo_ext} > {output.output_log}
-        """
+    run:
+        script_path = workflow.source_path("prepare_for_folding/targets_from_reads.py")
+        shell(f"""
+        python {script_path} -i {input.reads} -o {params.output_wo_ext} > {output.output_log}""")
 
 rule folding_openen:
     input:
