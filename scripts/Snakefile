@@ -1,5 +1,5 @@
 # Pipeline purpose - prepare targets for folding,
-# run folding with RNAfold, collect results
+# run folding with RNAfold, collect results and preparation for visualization
 
 import os
 
@@ -14,24 +14,25 @@ rule all:
     input:
         openen_results = expand(os.path.join(path_to_samples, "{index}_i50_51_openen"), index=samples),
         probs_results = expand(os.path.join(path_to_samples,"{index}_i50_51_probs"),index=samples),
-
+        mfe_results = expand(os.path.join(path_to_samples,"{index}_mfe_rnafold.tsv"),index=samples)
 
 rule target_preparation:
     input:
         reads = os.path.join(path_to_samples, "{index}_R1_trimmed_T7_HH_HDV.fastq.gz")
     output:
         output_log = os.path.join(path_to_samples, "{index}_targets_info"),
-        output = os.path.join(path_to_samples,"{index}_i50_51.fasta")
+        all_targets = os.path.join(path_to_samples,"{index}_i50_51.fasta")
     params:
         output_wo_ext = os.path.join(path_to_samples, "{index}")
     run:
         script_path = workflow.source_path("prepare_for_folding/targets_from_reads.py")
         shell(f"""python {script_path} -i {input.reads} -o {params.output_wo_ext} > {output.output_log}""")
 
+
 rule folding_openen:
     input:
         target_prep_log = rules.target_preparation.output.output_log,
-        samples = rules.target_preparation.output.output
+        samples = rules.target_preparation.output.all_targets
     output:
         openen_results = directory(os.path.join(path_to_samples, "{index}_openen"))
     shell:
@@ -47,7 +48,7 @@ rule collect_openen:
     output:
         path_to_output = os.path.join(path_to_samples,"{index}_i50_51_openen")
     params:
-        fasta = rules.target_preparation.output.output
+        fasta = rules.target_preparation.output.all_targets
     run:
         script_path = workflow.source_path("folding_analysis/collect_rnaplfold_results.py")
         shell(f"""python {script_path} -i {input.folder_with_results} -o {output.path_to_output} -f {params.fasta} -s {wildcards.index} -t en""")
@@ -56,7 +57,7 @@ rule collect_openen:
 rule folding_probs:
     input:
         target_prep_log = rules.target_preparation.output.output_log,
-        samples = rules.target_preparation.output.output
+        samples = rules.target_preparation.output.all_targets
     output:
         probs_results = directory(os.path.join(path_to_samples, "{index}_probs"))
     shell:
@@ -72,8 +73,29 @@ rule collect_probs:
     output:
         path_to_output = os.path.join(path_to_samples,"{index}_i50_51_probs")
     params:
-        fasta = rules.target_preparation.output.output
+        fasta = rules.target_preparation.output.all_targets
     run:
         script_path = workflow.source_path("folding_analysis/collect_rnaplfold_results.py")
         shell(f"""python {script_path} -i {input.folder_with_results} -o {output.path_to_output} -f {params.fasta} -s {wildcards.index} -t prob""")
 
+
+rule folding_mfe:
+    input:
+        target_prep_log = rules.target_preparation.output.output_log,
+        samples = rules.target_preparation.output.all_targets
+    output:
+        mfe_raw_results = os.path.join(path_to_samples,"{index}_mfe_rnafold_out")
+    shell:
+        """
+        RNAfold -p -d2 --noLP < {input.samples} > {output.mfe_raw_results}
+        """
+
+
+rule collect_mfe:
+    input:
+        mfe_raw_results = rules.folding_mfe.output.mfe_raw_results
+    output:
+        mfe_parced_results = os.path.join(path_to_samples,"{index}_mfe_rnafold.tsv")
+    run:
+        script_path = workflow.source_path("folding_analysis/mfe_results.py")
+        shell(f"""python {script_path} -i {input.mfe_raw_results} -o {output.mfe_parced_results}""")
