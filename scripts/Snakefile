@@ -12,8 +12,8 @@ print(samples)
 
 rule all:
     input:
-        openen_results = expand(os.path.join(path_to_samples, "{index}_openen"), index=samples),
-        probs_results = expand(os.path.join(path_to_samples,"{index}_probs"),index=samples),
+        openen_results = expand(os.path.join(path_to_samples, "{index}_i50_51_openen"), index=samples),
+        probs_results = expand(os.path.join(path_to_samples,"{index}_i50_51_probs"),index=samples),
 
 
 rule target_preparation:
@@ -26,8 +26,7 @@ rule target_preparation:
         output_wo_ext = os.path.join(path_to_samples, "{index}")
     run:
         script_path = workflow.source_path("prepare_for_folding/targets_from_reads.py")
-        shell(f"""
-        python {script_path} -i {input.reads} -o {params.output_wo_ext} > {output.output_log}""")
+        shell(f"""python {script_path} -i {input.reads} -o {params.output_wo_ext} > {output.output_log}""")
 
 rule folding_openen:
     input:
@@ -42,6 +41,20 @@ rule folding_openen:
         RNAplfold -O < {input.samples}
         """
 
+rule collect_openen:
+    input:
+        folder_with_results = rules.folding_openen.output.openen_results
+    output:
+        path_to_output = os.path.join(path_to_samples,"{index}_i50_51_openen")
+    params:
+        fasta = rules.target_preparation.output.output
+    run:
+        script_path = workflow.source_path("folding_analysis/collect_rnaplfold_results.py")
+        shell(f"""python {script_path} -i {input.folder_with_results} 
+        -o {output.path_to_output} -f {params.fasta} 
+        -s {wildcards.index} -t en""")
+
+
 rule folding_probs:
     input:
         target_prep_log = rules.target_preparation.output.output_log,
@@ -54,4 +67,17 @@ rule folding_probs:
         cd {output.probs_results}
         RNAplfold -u 2 < {input.samples}
         """
+
+rule collect_probs:
+    input:
+        folder_with_results = rules.folding_probs.output.probs_results
+    output:
+        path_to_output = os.path.join(path_to_samples,"{index}_i50_51_probs")
+    params:
+        fasta = rules.target_preparation.output.output
+    run:
+        script_path = workflow.source_path("folding_analysis/collect_rnaplfold_results.py")
+        shell(f"""python {script_path} -i {input.folder_with_results} 
+        -o {output.path_to_output} -f {params.fasta} 
+        -s {wildcards.index} -t prob""")
 
