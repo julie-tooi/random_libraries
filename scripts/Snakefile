@@ -50,9 +50,7 @@ rule collect_openen:
         fasta = rules.target_preparation.output.output
     run:
         script_path = workflow.source_path("folding_analysis/collect_rnaplfold_results.py")
-        shell(f"""python {script_path} -i {input.folder_with_results} 
-        -o {output.path_to_output} -f {params.fasta} 
-        -s {wildcards.index} -t en""")
+        shell(f"""python {script_path} -i {input.folder_with_results} -o {output.path_to_output} -f {params.fasta} -s {wildcards.index} -t en""")
 
 
 rule folding_probs:
@@ -77,7 +75,5 @@ rule collect_probs:
         fasta = rules.target_preparation.output.output
     run:
         script_path = workflow.source_path("folding_analysis/collect_rnaplfold_results.py")
-        shell(f"""python {script_path} -i {input.folder_with_results} 
-        -o {output.path_to_output} -f {params.fasta} 
-        -s {wildcards.index} -t prob""")
+        shell(f"""python {script_path} -i {input.folder_with_results} -o {output.path_to_output} -f {params.fasta} -s {wildcards.index} -t prob""")
 
