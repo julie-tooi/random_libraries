@@ -13,7 +13,7 @@ if __name__ == '__main__':
     path_to_rnafold_results = args.output
 
 
-    with open(path_to_rnafold_collected, 'w') as output:
+    with open(path_to_rnafold_results, 'w') as output:
         header = "\t".join([
             "read_id", "sequence", "mfe_struc", "mfe_en",
             "centroid_struc", "centroid_en",
@@ -22,7 +22,7 @@ if __name__ == '__main__':
         ])
         output.write(f"{header}\n")
 
-        with open(path_to_rnafold_results, 'r') as file_handler:
+        with open(path_to_rnafold_collected, 'r') as file_handler:
             # parce output file
             for line in file_handler:
                 seq_name = line.strip()[1::]
