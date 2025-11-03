@@ -1,6 +1,8 @@
 # Script purpose is to collect results of RNAfold (MFE) and prepare for visualisation
 
 import argparse
+import os
+from glob import glob
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -62,3 +64,14 @@ if __name__ == '__main__':
 
                 new_line = "\t".join(new_line)
                 output.write(f"{new_line}\n")
+
+    # check for additional files
+    folder_to_check = path_to_rnafold_collected.split("/")[:-1]
+    folder_to_check = "/".join(folder_to_check) + "/*"
+
+    files_in_folder = glob(folder_to_check)
+
+    for one_file in files_in_folder:
+        if "_dp.ps" or "_ss.ps" in one_file:
+            # remove file
+            os.remove(one_file)
