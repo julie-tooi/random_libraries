@@ -72,6 +72,6 @@ if __name__ == '__main__':
     files_in_folder = glob(folder_to_check)
 
     for one_file in files_in_folder:
-        if "_dp.ps" or "_ss.ps" in one_file:
+        if ("_dp.ps" in one_file) or ("_ss.ps" in one_file):
             # remove file
             os.remove(one_file)
