@@ -40,12 +40,18 @@ if __name__ == '__main__':
     with open(path_to_output, 'w') as output:
         output.write("sample,read_id,position,u1,u2,u3,base\n")
         for file in batch:
-            file_name = file.split("/")[-1].split("_u4.out")[0].replace("_", ":")
+            file_name = file.split("/")[-1].split("_u4.out")[0]
 
             with open(file, 'r') as file_handler:
+
+                file_handler.readline()
+                file_handler.readline()
+                file_handler.readline()
+
                 for line in file_handler:
+
                     if "#" not in line:
-                        line = line.strip().split("\t")
+                        line = line.strip().split()
                         position = line[0]
                         u1, u2, u3 = line[1], line[2], line[3]
                         base = detect_base(position, file_name, target_collection)
